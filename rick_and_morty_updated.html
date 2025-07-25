@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rick and Morty Episode Picker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 50px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    label {
+      font-size: 18px;
+    }
+    select, button {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #00b894;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #019875;
+    }
+    .episode-info {
+      margin-top: 25px;
+      max-width: 600px;
+    }
+    .episode-info h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .episode-info p {
+      font-size: 16px;
+      color: #cccccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rick and Morty Episode Picker</h1>
+  <div class="controls">
+    <label for="seasonSelect">Season:</label>
+    <select id="seasonSelect" onchange="updateEpisodes()">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+    </select>
+    <label for="episodeSelect">Episode:</label>
+    <select id="episodeSelect" onchange="updateEpisodeInfo()"></select>
+    <button id="watchButton" onclick="openInNewTab()">Watch Now</button>
+  </div>
+  <div class="episode-info" id="episodeInfo"></div>
+
+  <script>
+    const episodesPerSeason = {1: 11, 2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10, 8: 10};
+
+    function updateEpisodes(selectedEpisode = "1") {
+      const season = document.getElementById("seasonSelect").value;
+      const episodeSelect = document.getElementById("episodeSelect");
+      episodeSelect.innerHTML = "";
+      const count = episodesPerSeason[season];
+
+      for (let i = 1; i <= count; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+
+        const watchedKey = `rm-watched-${season}-${i}`;
+        const isWatched = localStorage.getItem(watchedKey) === "true";
+        option.textContent = isWatched ? `✅ ${i}` : `${i}`;
+
+        if (i.toString() === selectedEpisode) {
+          option.selected = true;
+        }
+
+        episodeSelect.appendChild(option);
+      }
+    }
+
+    function updateEpisodeInfo() {
+      const season = document.getElementById("seasonSelect").value;
+      const episode = document.getElementById("episodeSelect").value;
+      const container = document.getElementById("episodeInfo");
+      const watchButton = document.getElementById("watchButton");
+
+      if (season === "8" && episode === "10") {
+        container.innerHTML = `<h2>Season 8, Episode 10</h2><p>Not released yet sorry!</p>`;
+        watchButton.disabled = true;
+      } else {
+        container.innerHTML = `<h2>Season ${season}, Episode ${episode}</h2><p>Ready to watch!</p>`;
+        watchButton.disabled = false;
+      }
+
+      const watchedKey = `rm-watched-${season}-${episode}`;
+      if (localStorage.getItem(watchedKey) === "true") {
+        container.innerHTML += `<p style="color: #00ff99;"><strong>✔ You’ve watched this episode</strong></p>`;
+      }
+    }
+
+    function getNextEpisode(currentSeason, currentEpisode) {
+      let s = parseInt(currentSeason);
+      let e = parseInt(currentEpisode);
+      while (true) {
+        e++;
+        if (e > episodesPerSeason[s]) {
+          s++;
+          e = 1;
+          if (!episodesPerSeason[s]) break;
+        }
+        const key = `rm-watched-${s}-${e}`;
+        if (localStorage.getItem(key) !== "true" && !(s === 8 && e === 10)) {
+          return { season: s.toString(), episode: e.toString() };
+        }
+      }
+      return { season: currentSeason, episode: currentEpisode };
+    }
+
+    function openInNewTab() {
+      const season = document.getElementById("seasonSelect").value;
+      const episode = document.getElementById("episodeSelect").value;
+      const key = `rm-watched-${season}-${episode}`;
+      localStorage.setItem(key, "true");
+      localStorage.setItem("rm-lastWatched", `${season}-${episode}`);
+      const url = `https://multiembed.mov/directstream.php?video_id=tt2861424&s=${season}&e=${episode}`;
+      window.open(url, '_blank');
+      updateEpisodeInfo();
+    }
+
+    window.onload = () => {
+      const lastWatched = localStorage.getItem("rm-lastWatched");
+      if (lastWatched) {
+        const [season, episode] = lastWatched.split("-");
+        document.getElementById("seasonSelect").value = season;
+        const next = getNextEpisode(season, episode);
+        document.getElementById("seasonSelect").value = next.season;
+        updateEpisodes(next.episode);
+        updateEpisodeInfo();
+      } else {
+        updateEpisodes();
+        updateEpisodeInfo();
+      }
+    };
+  </script>
+</body>
+</html>
