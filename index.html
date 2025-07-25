@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +165,9 @@
         updateEpisodeInfo();
       } else {
         updateEpisodes();
-        updateEpisodeInfo();
+document.getElementById("episodeSelect").selectedIndex = 0;
+updateEpisodeInfo();
+
       }
     };
   </script>
