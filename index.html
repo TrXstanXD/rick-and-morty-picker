@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rick and Morty Episode Picker44</title>
+  <title>Rick and Morty Episode Picker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -61,7 +61,7 @@
   </style>
 </head>
 <body>
-  <h1>Rick and Morty Episode Picker44</h1>
+  <h1>Rick and Morty Episode Picker</h1>
   <div class="controls">
     <label for="seasonSelect">Season:</label>
     <select id="seasonSelect" onchange="updateEpisodes()">
@@ -192,19 +192,7 @@ window.onload = () => {
     const next = getNextEpisode(season, episode);
 
     document.getElementById("seasonSelect").value = next.season;
-    updateEpisodes(next.episode); // update dropdown and select next ep
-
-    // Mark it watched
-    const watchKey = `watched-${next.season}-${next.episode}`;
-    localStorage.setItem(watchKey, "true");
-    localStorage.setItem("rm-lastWatched", `${next.season}-${next.episode}`);
-
-    // Open video in new tab
-    if (!(next.season === "8" && next.episode === "10")) {
-      const url = `https://multiembed.mov/directstream.php?video_id=tt2861424&s=${next.season}&e=${next.episode}`;
-      window.open(url, "_blank");
-    }
-
+    updateEpisodes(next.episode); // sets episode dropdown
     updateEpisodeInfo();
   } else {
     updateEpisodes();
@@ -212,6 +200,7 @@ window.onload = () => {
     updateEpisodeInfo();
   }
 };
+
 
 
       }
